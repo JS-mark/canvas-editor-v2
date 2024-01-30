@@ -1,0 +1,54 @@
+@import '../assets/fonts/font.css';
+
+:root {
+  --mx-menu-placeholder-width: 0;
+  --mx-menu-backgroud: #373739;
+  --mx-menu-hover-backgroud: #416ef6;
+  --mx-menu-open-text: #ffffff;
+  --mx-menu-text: #ffffff;
+  --mx-menu-open-backgroud: #416ef6;
+  --mx-menu-open-hover-text: #2e2e2e;
+  --mx-menu-divider: #4f4f51;
+}
+
+.menu-item {
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mx-context-menu-item-sperator {
+  margin: 0 10px;
+}
+
+.mx-context-menu-item-sperator:after {
+  display: block;
+  content: "";
+  background-color: var(--mx-menu-divider);
+  height: 1px;
+  transform: scaleY(0.5);
+}
+
+.mx-item-row{
+  &:first-child {
+    width: 100%;
+  }
+}
+
+.mx-context-menu {
+  padding: 6px 0;
+}
+
+.mx-context-menu-item {
+  margin: 0 6px;
+}
+
+.mx-context-menu-item.open {
+  border-radius: 4px;
+}
+
+.mx-context-menu-item:hover, .mx-context-menu-item.open:hover {
+  background-color: var(--mx-menu-hover-backgroud);
+  color: var(--mx-menu-hover-text);
+  border-radius: 4px;
+}
