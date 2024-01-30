@@ -2,9 +2,15 @@
   "name": "@tm2js/canvas-editor",
   "version": "0.0.1",
   "description": "canvas-editor",
+  "packageManager": "pnpm@8.13.1",
+  "author": "The Mark <sunduo3195@qq.com> (https://github.com/js-mark/)",
+  "license": "MIT",
+  "funding": "https://github.com/sponsors/js-mark",
   "types": "dist/types/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "styles",
+    "README.md"
   ],
   "main": "./dist/umd/index.js",
   "module": "./dist/es/index.js",
@@ -13,6 +19,10 @@
       "import": "./dist/es/index.js",
       "require": "./dist/cjs/index.js"
     }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "dev": "vite",
