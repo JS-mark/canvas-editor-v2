@@ -9,7 +9,10 @@ export default defineConfig((config: UserConfig) => {
   return {
     plugins: [
       Dts({
-        rollupTypes: true
+        tsconfigPath: './tsconfig.json',
+        rollupTypes: true,
+        outDir: 'dist/types',
+        exclude: ['**/__tests__/**', '**/*.stories.@(js|jsx|ts|tsx)', 'vite.config.ts'],
       })
     ],
     build: {

@@ -22,9 +22,9 @@
     "declarationDir": "./dist/types", /* '.d.ts' 文件输出目录 */
     "emitDeclarationOnly": true, /* 只生成声明文件，不生成 js 文件*/
   },
-  "references": [{ "path": "./tsconfig.node.json" }],
   "include": [
+    "./index.ts",
     "./**/*.ts",
     "./type.d.ts"
-  ]
+  ],
 }

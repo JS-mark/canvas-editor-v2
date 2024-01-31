@@ -40,6 +40,13 @@ export class Editor extends EventEmitter {
     'hookSaveAfter',
   ]
 
+  /**
+   * 返回 canvas
+   */
+  get canvas() {
+    return this._canvas
+  }
+
   private hooksEntity: Map<string, AsyncSeriesHook<any>> = new Map()
 
   init(canvas: fabric.Canvas) {
