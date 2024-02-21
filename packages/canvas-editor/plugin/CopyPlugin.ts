@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-06-20 12:38:37
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-29 23:22:36
+ * @LastEditTime: 2024-02-07 14:10:09
  * @Description: 复制插件
  */
 
@@ -11,6 +11,7 @@ import { clipboardText } from '../utils/utils'
 
 import type { fabric } from 'fabric'
 import type { Editor } from '../core'
+import { cloneDeep } from 'lodash-es'
 
 export class CopyPlugin extends Plugin.BasePlugin {
   get name() {
@@ -48,12 +49,20 @@ export class CopyPlugin extends Plugin.BasePlugin {
           left: clonedObj.left + grid,
           top: clonedObj.top + grid,
           evented: true,
-          name: this.genUid(),
+          id: this.genUid(),
+          name: this.genName(),
+          custom: {
+            type: clonedObj.type || "",
+            schemes: []
+          }
         })
         clonedObj.forEachObject((obj: fabric.Object) => {
           // 组件 id
-          obj.id = this.genUid()
-          obj.name = this.genName()
+          obj.set({
+            id: this.genUid(),
+            name: this.genName(),
+            custom: obj.get('custom')
+          })
           this._canvas.add(obj)
         })
         // 解决不可选择问题
@@ -77,7 +86,9 @@ export class CopyPlugin extends Plugin.BasePlugin {
         left: cloned.left + grid,
         top: cloned.top + grid,
         evented: true,
-        name: this.genUid(),
+        id: this.genUid(),
+        name: this.genName(),
+        custom: cloneDeep(activeObject.custom)
       })
       this._canvas.add(cloned)
       this._canvas.setActiveObject(cloned)
@@ -116,7 +127,7 @@ export class CopyPlugin extends Plugin.BasePlugin {
    * @param obj
    * @param val
    */
-  copyText(obj?: fabric.Object, val: string = '') {
+  copyText(obj?: fabric.Object, val = '') {
     const curTarget = obj || this._canvas.getActiveObject()
     return clipboardText(val || curTarget?.name || curTarget?.id || '')
   }

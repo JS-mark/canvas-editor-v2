@@ -14,11 +14,13 @@ export namespace Plugin {
     | 'hookSaveBefore'
     | 'hookSaveAfter'
 
-  export type PluginCtor = new (canvas: fabric.Canvas, editor: Editor, options: Options) => Plugin.BasePlugin
+  export type PluginCtor<T> = new (canvas: fabric.Canvas, editor: Editor, options: Options) => T extends new (canvas: fabric.Canvas, editor: Editor, options: Options) => infer R ? R : any
 
   export type Options = Exposed<Record<string, any>>
 
   export type Exposed<T> = { [K in keyof T]: T[K] }
+
+  export type BasePluginParameters = ConstructorParameters<typeof Plugin.BasePlugin>
 
   export interface Base {
     readonly _canvas: fabric.Canvas
@@ -36,6 +38,8 @@ export namespace Plugin {
     public readonly _canvas: fabric.Canvas
     public readonly _editor: Editor
     public readonly _options: Options
+    // 伪造新方法
+    [key: string]: any
     // 插件名称
     protected abstract get name(): string
     // 事件

@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2024-01-22 23:00:43
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-30 13:52:23
+ * @LastEditTime: 2024-02-06 11:45:05
  * @Description: 控制条插件
  */
 
@@ -93,8 +93,8 @@ function intervalControl() {
   ) {
     drawImg(ctx, left, top, horizontalImgIcon, 16, 12, fabricObject.angle)
   }
-  // 中间横杠
-  fabric.Object.prototype.controls.ml = new fabric.Control({
+  // 左侧中间横杠
+  const ml = new fabric.Control({
     x: -0.5,
     y: 0,
     offsetX: -1,
@@ -103,14 +103,42 @@ function intervalControl() {
     getActionName: fabric.controlsUtils.scaleOrSkewActionName,
     render: renderIcon,
   })
-
-  fabric.Object.prototype.controls.mr = new fabric.Control({
+  // 右侧中间横杠
+  const mr = new fabric.Control({
     x: 0.5,
     y: 0,
     offsetX: 1,
     cursorStyleHandler: fabric.controlsUtils.scaleSkewCursorStyleHandler,
     actionHandler: fabric.controlsUtils.scalingXOrSkewingY,
     getActionName: fabric.controlsUtils.scaleOrSkewActionName,
+    render: renderIcon,
+  })
+
+  // 左中间横杠
+  fabric.Object.prototype.controls.ml = ml
+  // 右边中间横杠
+  fabric.Object.prototype.controls.mr = mr
+
+  // Textbox
+  const origin = fabric.Textbox.prototype.controls
+  fabric.Textbox.prototype.controls.ml = new fabric.Control({
+    x: -0.5,
+    y: 0,
+    offsetX: -1,
+    cursorStyleHandler: origin.ml.cursorStyleHandler,
+    actionHandler: origin.ml.actionHandler,
+    getActionName: origin.ml.getActionName,
+    render: renderIcon,
+  })
+
+  // Textbox
+  fabric.Textbox.prototype.controls.mr = new fabric.Control({
+    x: 0.5,
+    y: 0,
+    offsetX: 1,
+    cursorStyleHandler: origin.mr.cursorStyleHandler,
+    actionHandler: origin.mr.actionHandler,
+    getActionName: origin.mr.getActionName,
     render: renderIcon,
   })
 
@@ -151,10 +179,10 @@ function peakControl() {
   }
 
   fabric.Object.prototype.getWidthHeight = function (noFixed = false) {
-    const point = this._getTransformedDimensions(0, 0)
+    const point = { x: this.width! * this.scaleX!, y: this.height! * this.scaleY! }
     if (!noFixed) {
-      point.x = Math.floor(point.x)
-      point.y = Math.floor(point.y)
+      point.x = Number(point.x.toFixed(2))
+      point.y = Number(point.y.toFixed(2))
     }
 
     return new fabric.Point(point.x, point.y)
@@ -307,8 +335,7 @@ function deleteControl(canvas: fabric.Canvas) {
     return true
   }
 
-  // 删除图标
-  fabric.Object.prototype.controls.deleteControl = new fabric.Control({
+  const deleteControl = new fabric.Control({
     x: 0,
     y: -0.5,
     offsetY: -25,
@@ -317,6 +344,12 @@ function deleteControl(canvas: fabric.Canvas) {
     mouseUpHandler: deleteObject,
     render: renderDelIcon,
   })
+
+  // Textbox
+  fabric.Textbox.prototype.controls.deleteControl = deleteControl
+
+  // 删除图标
+  fabric.Object.prototype.controls.deleteControl = deleteControl
 }
 
 // 旋转
@@ -332,6 +365,7 @@ function rotationControl() {
   ) {
     drawImg(ctx, left, top, img, 40, 40, fabricObject.angle)
   }
+
   // 旋转图标
   fabric.Object.prototype.controls.mtr = new fabric.Control({
     x: 0,
@@ -370,6 +404,16 @@ export class ControlsPlugin extends Plugin.BasePlugin {
     peakControl()
     // 中间横杠图标
     intervalControl()
+
+
+    // // 隐藏中间操作图标
+    // fabric.Object.prototype.setControlsVisibility({
+    //   mb: false, // 下中
+    //   ml: false, // 中左
+    //   mr: false, // 中右
+    //   mt: false, // 上中
+    // })
+
     // 旋转图标
     rotationControl()
 
@@ -379,14 +423,15 @@ export class ControlsPlugin extends Plugin.BasePlugin {
       borderColor: '#51B9F9',
       cornerColor: '#FFF',
       borderScaleFactor: 1,
-      padding: 4,
-      backgroundColor: "#fff",
+      padding: 6,
+      // 默认背景色为 透明
+      backgroundColor: 'transparent',
       // 选中背景色
-      selectionBackgroundColor: 'rgba(114, 84, 228, 0.45)',
+      selectionBackgroundColor: 'transparent',
       cornerStyle: 'circle',
       cornerStrokeColor: '#0E98FC',
       // 选中移动时透明度
-      borderOpacityWhenMoving: 0.2,
+      borderOpacityWhenMoving: 1,
     })
   }
 }

@@ -1,7 +1,9 @@
+import dayjs from 'dayjs'
 import { Plugin } from './createPlugin'
-import { objectOmit } from '@vueuse/shared'
+import { parseCSSGradient, generateFabricGradientFromColorStops } from '../utils/color'
+
+import type { fabric } from 'fabric'
 import type { Editor } from '../core'
-import type fabric from 'fabric/fabric-impl'
 
 /**
  * 仅支持单个元素编辑
@@ -40,15 +42,6 @@ export class AttrsEditPlugin extends Plugin.BasePlugin {
    */
   private _getCurTarget() {
     return this._canvas.getActiveObject()
-  }
-
-  /**
-   * 过滤可以编辑的属性
-   * @param obj
-   * @returns fabric.Object
-   */
-  filterCanEditAttrs(obj: fabric.Object) {
-    return objectOmit(obj, this._canEditAttrs)
   }
 
   private _onObjectModify(event: fabric.IEvent<Event>) {
@@ -177,22 +170,35 @@ export class AttrsEditPlugin extends Plugin.BasePlugin {
     if (!target) {
       throw new Error('元素不存在，无法更新！')
     }
-    target.evented = !target.evented
-    target.hasControls = target.evented
-    target.selectable = target.evented
+    target.hasControls = !target.hasControls
+    const attrs = [
+      'lockMovementX',
+      'lockMovementY',
+      'lockRotation',
+      'lockScalingX',
+      'lockScalingY',
+    ]
+    target.set(attrs.reduce((data, key) => {
+      // @ts-expect-error
+      data[key] = !target.hasControls
+      return data
+    }, {}))
     // 更新视图
-    this._canvas.renderAndReset()
+    this._canvas.requestRenderAll()
     // 通知编辑器更新
-    this._noticeEditorUpdate('', null, target)
+    this._noticeEditorUpdate('modify-lock', null, target)
   }
 
   /**
    * 编辑元素
    */
-  editAttr(id: string, data: any): void {
-    let target: fabric.Object | undefined
+  editAttr(
+    id: string,
+    data: any,
+    cb?: (target: fabric.Group | fabric.Rect | fabric.IText | fabric.Textbox, context: ThisType<AttrsEditPlugin>) => void,
+  ): void {
     const objects = this._canvas.getObjects()
-    target = objects.find((item) => {
+    const target: fabric.Object | fabric.Group | undefined = objects.find((item) => {
       // 自定义元素 id
       return item.id === id
     })
@@ -209,47 +215,124 @@ export class AttrsEditPlugin extends Plugin.BasePlugin {
 
     // 更新 image 组件 src
     if (target?.isType('image')) {
-      const { width, height, scaleY, scaleX } = target
+      // const { width, height, scaleY, scaleX } = target
       updateImgSrc(data.src as string, target as fabric.Image, () => {
-        target?.set({
-          scaleX: (width! * scaleX!) / target.width!,
-          scaleY: (height! * scaleY!) / target.height!,
-        })
+        // 不在处理缩放
+        // target?.set({
+        //   scaleX: (width! * scaleX!) / target.width!,
+        //   scaleY: (height! * scaleY!) / target.height!,
+        // })
         this._canvas.requestRenderAll()
       })
       return
     }
+
     // qrcode 组件
     if (target?.isType('group')) {
-      if (target.custom.schemes) {
-        for (const item of target.custom.schemes) {
-          if (item.type === 'qrcode') {
-            const plugin = this._editor.getPlugin('InsertQRCodePlugin')
-            plugin?.genQrcodeComp(data.text, item.options.options).then((newQrcode) => {
-              newQrcode?.set({
-                id: target!.id,
-                name: target!.name,
-                left: target!.left,
-                top: target!.top,
-                scaleX: target!.scaleX,
-                scaleY: target!.scaleY,
-                custom: target!.custom,
-              })
-              this._canvas.remove(target!)
-              this._canvas.add(newQrcode!)
-              this._canvas.requestRenderAll()
-            })
-            break
-          }
-        }
+      if (!target.custom.data) {
         return
+      }
+
+      if (target.custom.type === 'qrcode') {
+        this._editor.getPluginV2('InsertQRCodePlugin').then((plugin) => {
+          // 更新原有数据
+          target!.custom!.data!.text = data.text
+          plugin?.genQrcodeComp(data.text, target!.custom.data!.options).then((newQrcode: fabric.Group | void) => {
+            newQrcode?.set({
+              id: target!.id,
+              name: target!.name,
+              left: target!.left,
+              top: target!.top,
+              custom: target!.custom,
+            })
+            this._canvas.remove(target!)
+            this._canvas.add(newQrcode!)
+            this._canvas.setActiveObject(newQrcode!)
+            this._canvas.requestRenderAll()
+          })
+        })
+        return
+      }
+
+      if (target.custom.type === 'dateTB') {
+        // NOTE: 更新自定义数据
+        target!.custom!.data!.value = data.value
+        const dateGroupObjects = (target as fabric.Group).getObjects()
+        let date = data?.value
+        if (!date) {
+          const template = 'YYYY-MM-DD'
+          date = dayjs(new Date()).format(template)
+        }
+        const arr = date.split('-')
+
+        dateGroupObjects?.forEach((i: any) => {
+          if (i.type == 'textbox' || i.type === 'text') {
+            if (i.custom.position == 'top') {
+              i.set('text', arr[0])
+            }
+            else {
+              i.set('text', arr[1] + '.' + arr[2])
+            }
+          }
+        })
+        this._canvas.requestRenderAll()
+      }
+
+      if (target.custom.type === 'avatar') {
+        const _icon = target.custom.data.icon
+        const _avatar = target.custom.data.avatar
+        const { icon, avatar } = data.value
+
+        target!.custom!.data = data.value
+        /**
+         * 异步调用插件
+         */
+        this._editor.getPluginV2('ShowUserAvatarsPlugin').then((plugin) => {
+          plugin?.genUserAvatarsComp(
+            { avatarUrl: avatar || _avatar || '', iconUrl: icon || _icon || '' },
+          ).then((newObj: fabric.Group | void) => {
+            newObj?.set({
+              id: target!.id,
+              name: target!.name,
+              left: target!.left,
+              top: target!.top,
+              custom: target!.custom,
+            })
+
+            this._canvas.remove(target!)
+            this._canvas.add(newObj!)
+            this._canvas.setActiveObject(newObj!)
+            this._canvas.requestRenderAll()
+          })
+        })
       }
     }
 
-    // 元素存在更新元素属性
-    target?.set(data)
+    if (target?.type === 'rect') {
+      const gradientData = parseCSSGradient(data.fill)
+      const { type, colors, shapeAndPosition } = gradientData!
+      const handlers = colors.map(item => ({
+        offset: item.position,
+        color: `rgba(${item.color.r}, ${item.color.g}, ${item.color.b}, ${item.color.a})`,
+      }))
+      const { width, height } = target
+      // 对外暴露
+      const fillObj = generateFabricGradientFromColorStops(handlers, width!, height!, type, shapeAndPosition!) || ''
+      target?.set({ fill: fillObj })
+    }
 
-    // 更新画布
-    this._canvas.requestRenderAll()
+    if (cb) {
+      cb(target!, this)
+    }
+    else {
+      // 元素存在更新元素属性
+      target?.set(data)
+      // 更新画布
+      this._canvas.requestRenderAll()
+    }
+  }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
   }
 }

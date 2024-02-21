@@ -1,3 +1,5 @@
+import { fabric } from 'fabric'
+
 /**
  * css 转 fabric 渐变
  * @param handlers
@@ -11,8 +13,8 @@ export const generateFabricGradientFromColorStops = (
   handlers: { offset: number, color: string }[],
   width: number,
   height: number,
-  type: 'linear' | 'radial',
-  angle: number,
+  type: 'linear-gradient' | 'radial-gradient',
+  angle: number | string,
 ) => {
   // 角度转换坐标
   const gradAngleToCoords = (paramsAngle: number | string) => {
@@ -58,10 +60,10 @@ export const generateFabricGradientFromColorStops = (
 
   let bgGradient: fabric.Gradient | null = null
   const colorStops = [...handlers]
-  if (type === 'linear') {
+  if (type === 'linear-gradient') {
     bgGradient = generateLinear(colorStops)
   }
-  else if (type === 'radial') {
+  else if (type === 'radial-gradient') {
     bgGradient = generateRadial(colorStops)
   }
 
@@ -77,7 +79,7 @@ interface RGBAColor {
 
 interface GradientColor {
   color: RGBAColor
-  position?: string
+  position: number
 }
 
 interface CSSGradient {
@@ -196,7 +198,8 @@ export function parseCSSGradient(input: string): CSSGradient | null {
   while ((colorMatch = colorPattern.exec(colorsPart)) !== null) {
     const rgba = parseColor(colorMatch[1])
     if (rgba) {
-      colors.push({ color: rgba, position: colorMatch[2]?.trim() || undefined })
+      const position = parseFloat(colorMatch[2]?.trim()) / 100
+      colors.push({ color: rgba, position })
     }
     else {
       console.error('Invalid color value: ' + colorMatch[1])
@@ -209,4 +212,28 @@ export function parseCSSGradient(input: string): CSSGradient | null {
     shapeAndPosition,
     colors,
   }
+}
+
+/**
+ * 转换渐变数据为 CSS 字符串
+ * @param gradient
+ * @returns string
+ */
+export function gradientToCss(gradient: fabric.Gradient): string {
+  const stops = gradient.colorStops!
+    .map(stop => `${stop.color} ${stop.offset * 100}%`)
+    .join(', ')
+
+  if (gradient.type === 'radial') {
+    const { x1, y1 } = gradient.coords!
+    return `radial-gradient(circle at ${x1}px ${y1}px, ${stops})`
+  }
+
+  if (gradient.type === 'linear') {
+    const { x1, y1, x2, y2 } = gradient.coords as Required<fabric.IGradientOptionsCoords>
+    const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI) + 90
+    return `linear-gradient(${angle}deg, ${stops})`
+  }
+
+  return ''
 }

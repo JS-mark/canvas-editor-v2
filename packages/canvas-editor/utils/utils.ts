@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2024-01-16 14:59:16
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-29 22:48:41
+ * @LastEditTime: 2024-02-06 16:42:09
  * @Description: file content
  */
 
@@ -10,10 +10,6 @@ import { isObject, isString } from 'lodash-es'
 import FontFaceObserver from 'fontfaceobserver'
 import { useClipboard, useFileDialog, useBase64 } from '@vueuse/core'
 
-interface Font {
-  type: string
-  fontFamily: string
-}
 
 /**
  * @description: 图片文件转字符串
@@ -40,18 +36,26 @@ export function downFontByJSON(str: string | any) {
     data = str
   }
 
-  const fontFamilies: string[] = data?.objects.filter(
-    (item: Font) =>
-    // 为text 并且不为包含字体
+  const getFontFamilies = (arr: any[]) => {
+    const fontFamilies: Map<string, boolean> = new Map()
+    arr.map((item: any) => {
+      if (['i-text', 'textbox', 'text'].includes(item.type!)) {
+        fontFamilies.set(item.fontFamily!, true)
+      }
+      if (item.objects && item.objects.length > 0) {
+        const map = getFontFamilies(item.objects)
+        map.forEach((value, key) => {
+          fontFamilies.set(key, value)
+        })
+      }
+    })
+    return fontFamilies
+  }
 
-      item.type.includes('text') && !skipFonts.includes(item.fontFamily),
-  )
-    .map((item: Font) => item.fontFamily)
-  console.log('fontFamilies', fontFamilies)
-
-  const fontFamiliesAll = fontFamilies.map((fontName) => {
+  const fontMap = getFontFamilies(data.objects)
+  const fontFamiliesAll = Array.from(fontMap.keys()).map((fontName) => {
     const font = new FontFaceObserver(fontName)
-    return font.load('system', 100)
+    return font.load('system', 15000)
   })
   return Promise.all(fontFamiliesAll)
 }

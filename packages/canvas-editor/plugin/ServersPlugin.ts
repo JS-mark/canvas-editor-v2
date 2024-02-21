@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-06-20 12:52:09
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-29 22:24:01
+ * @LastEditTime: 2024-02-21 20:32:38
  * @Description: 内部插件
  */
 import { nanoid } from 'nanoid'
@@ -21,12 +21,15 @@ function downFile(fileStr: string, fileType: string) {
   anchorEl.remove()
 }
 
+type Comp = fabric.Group | fabric.Path | fabric.Rect | fabric.Circle | fabric.Triangle | fabric.Polygon | fabric.Text | fabric.Image | fabric.ActiveSelection | fabric.Textbox
+
 /**
  * 只转换 objects
  * @param objects
  * @returns objects
  */
-function transformText(objects: fabric.Object[], opt: { filterBase64: boolean } = { filterBase64: false }) {
+function transformObject(objects: Comp[], opt: { filterBase64: boolean } = { filterBase64: false }) {
+  const base64Reg = /^data:([a-zA-Z]+\/[a-zA-Z0-9-.+]+)?(;charset=[a-zA-Z0-9-]+)?(;base64),[A-Za-z0-9+/]+={0,2}$/
   if (!objects)
     return objects
   const arr = cloneDeep(objects)
@@ -34,13 +37,17 @@ function transformText(objects: fabric.Object[], opt: { filterBase64: boolean } 
     // @ts-expect-error
     if (item.objects) {
       // @ts-expect-error
-      item.objects = transformText(item.objects, opt)
+      item.objects = transformObject(item.objects, opt)
     }
     else {
-      item.type === 'text' && (item.type = 'textbox')
-      if (opt.filterBase64 && item.custom?.type === 'qrcode') {
+      // 元素的 styles 属性
+      if (['i-text', 'textbox'].includes(item.type!)) {
+        (item as fabric.Textbox | fabric.IText).styles = []
+      }
+
+      if (opt.filterBase64 && item.type === 'image') {
         // @ts-expect-error
-        item.src = ''
+        item.src = base64Reg.test(item.src) ? '' : item.src
       }
     }
     return item
@@ -157,6 +164,11 @@ export class ServersPlugin extends Plugin.BasePlugin {
       'hasControls',
       'visible',
       'evented',
+      'lockMovementX',
+      'lockMovementY',
+      'lockRotation',
+      'lockScalingX',
+      'lockScalingY',
     ])
   }
 
@@ -243,14 +255,14 @@ export class ServersPlugin extends Plugin.BasePlugin {
   async toJSON() {
     const data = await this.getJson()
     // 把文本text转为textgroup，让导入可以编辑
-    data.objects = transformText(data.objects)
+    data.objects = transformObject(data.objects)
     return data
   }
 
   async toJSONv2() {
     const data = await this.getJson()
     // 把文本text转为textgroup，让导入可以编辑
-    data.objects = transformText(data.objects, { filterBase64: true })
+    data.objects = transformObject(data.objects, { filterBase64: true })
     return data
   }
 
@@ -339,8 +351,11 @@ export class ServersPlugin extends Plugin.BasePlugin {
         this._canvas.remove(obj)
       }
     })
-    this._canvas.clear()
     this._canvas.discardActiveObject()
     this._canvas.renderAll()
+  }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
   }
 }

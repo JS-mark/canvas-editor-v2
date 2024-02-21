@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-06-21 22:09:36
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-30 14:01:22
+ * @LastEditTime: 2024-02-03 21:27:44
  * @Description: file content
  */
 
@@ -61,7 +61,12 @@ export class DrawLinePlugin extends Plugin.BasePlugin {
       this.lineToDraw = new NodeHandler(this.pointerPoints, {
         strokeWidth: 2,
         stroke: '#000000',
-        name: this.genUid(),
+        id: this.genUid(),
+        name: this.genName(),
+        custom: {
+          type: "arrow",
+          schemes: []
+        }
       })
 
       this.lineToDraw.selectable = false

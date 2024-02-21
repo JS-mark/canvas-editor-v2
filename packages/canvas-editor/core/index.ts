@@ -2,9 +2,9 @@ import hotkeys from 'hotkeys-js'
 import EventEmitter from 'eventemitter3'
 import { AsyncSeriesHook } from 'tapable'
 import { assign, isArray } from 'lodash-es'
+import { allFonts, setFontsStyle } from '../utils'
 import type { fabric } from 'fabric'
-import type { Plugin } from '../plugin/createPlugin'
-import type { PluginInstance, UsePlugin } from '../plugin'
+import type { Plugin, PluginInstance, UsePlugin } from '../plugin'
 
 interface EditorOptions {
   debug: boolean
@@ -27,8 +27,8 @@ export class Editor extends EventEmitter {
     canEdit: false,
   }
 
-  private _options: EditorOptions = { debug: true }
-  private _pluginMap: Map<keyof PluginInstance, PluginInstance[keyof PluginInstance]> = new Map()
+  private _options: EditorOptions = { debug: false }
+  private _pluginMap: Map<string, Plugin.BasePlugin> = new Map()
 
   // 自定义事件
   private _customEvents: string[] = []
@@ -47,19 +47,10 @@ export class Editor extends EventEmitter {
     return this._canvas
   }
 
-  private hooksEntity: Map<string, AsyncSeriesHook<any>> = new Map()
-
-  init(canvas: fabric.Canvas) {
-    this._canvas = canvas
-    this._bindContextMenu()
-    this._initActionHooks()
-    this.updateStatus({ ready: true })
-  }
-
   /**
    * 获取配置
    */
-  getEditorConfig() {
+  get config() {
     return this._options
   }
 
@@ -67,8 +58,25 @@ export class Editor extends EventEmitter {
    * 更新编辑器选项
    * @param options
    */
-  setEditorConfig(options: EditorOptions) {
+  set config(options: EditorOptions) {
     assign(this._options, options)
+  }
+
+  private hooksEntity: Map<string, AsyncSeriesHook<any>> = new Map()
+
+  /**
+   * 初始化
+   * @param canvas
+   */
+  init(canvas: fabric.Canvas) {
+    this._canvas = canvas
+    this._bindContextMenu()
+    this._initActionHooks()
+    // 监听编辑器状态
+    this.once('ready', () => {
+      this.updateStatus({ ready: true })
+    })
+    this.initFont()
   }
 
   /**
@@ -97,7 +105,7 @@ export class Editor extends EventEmitter {
     const pluginRunTime = new Ctor(this._canvas!, this, options)
     if (this._checkPlugin(pluginRunTime)) {
       // 调用生命周期插件
-      this._pluginMap.set(pluginRunTime.get('name') as keyof PluginInstance, pluginRunTime as PluginInstance[keyof PluginInstance])
+      this._pluginMap.set(pluginRunTime.get('name'), pluginRunTime as PluginInstance[keyof PluginInstance])
       this._saveCustomAttr(pluginRunTime)
       this._bindingHooks(pluginRunTime)
       this._bindingHotkeys(pluginRunTime)
@@ -109,10 +117,31 @@ export class Editor extends EventEmitter {
   }
 
   // 获取插件
-  getPlugin<T extends PluginInstance, K extends keyof PluginInstance>(name: K) {
+  getPlugin<T extends PluginInstance, K extends keyof PluginInstance>(name: K): T[K]
+  getPlugin<T extends Plugin.BasePlugin>(name: string): T
+  getPlugin<T = any>(name: any) {
     if (this._pluginMap.has(name)) {
-      return this._pluginMap.get(name) as T[K]
+      return this._pluginMap.get(name) as T
     }
+  }
+
+  /**
+   * 异步获取插件
+   * @param name
+   */
+  getPluginV2<T extends PluginInstance, K extends keyof PluginInstance>(name: K): Promise<T[K]>
+  getPluginV2<T extends Plugin.BasePlugin>(name: string): Promise<T>
+  getPluginV2<T = any>(name: any) {
+    return new Promise((resolve) => {
+      if (this._pluginMap.has(name)) {
+        return resolve(this._pluginMap.get(name) as T)
+      }
+      else {
+        this.once(`${name}:mounted`, () => {
+          resolve(this._pluginMap.get(name) as T)
+        })
+      }
+    })
   }
 
   /**
@@ -129,7 +158,7 @@ export class Editor extends EventEmitter {
 
   // 检查组件
   private _checkPlugin(plugin: Plugin.BasePlugin) {
-    const pluginName = plugin.get('name') as keyof PluginInstance
+    const pluginName = plugin.get('name')
     const events = plugin.get('events')
     // 名称检查
     if (this._pluginMap.has(pluginName)) {
@@ -206,6 +235,13 @@ export class Editor extends EventEmitter {
     this._hooks.forEach((hookName) => {
       this.hooksEntity.set(hookName, new AsyncSeriesHook(['data']))
     })
+  }
+
+  /**
+   * 初始化字体库
+   */
+  private initFont() {
+    setFontsStyle(allFonts)
   }
 
   /**

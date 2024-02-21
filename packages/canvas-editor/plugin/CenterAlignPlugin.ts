@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-06-15 22:49:42
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-26 19:59:50
+ * @LastEditTime: 2024-02-03 22:32:53
  * @Description: 居中对齐插件
  */
 
@@ -54,7 +54,6 @@ export class CenterAlignPlugin extends Plugin.BasePlugin {
         return item.id === 'workspace' && item.name === 'workspace'
       })
       if (defaultWorkspace) {
-        console.log(this[name])
         this[name](defaultWorkspace, activeObject)
       }
       this._canvas.renderAll()

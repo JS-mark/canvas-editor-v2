@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-06-15 23:23:18
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-28 22:13:07
+ * @LastEditTime: 2024-02-07 11:28:54
  * @Description: 图层调整插件
  */
 
@@ -76,5 +76,9 @@ export class LayerPlugin extends Plugin.BasePlugin {
       this._canvas.renderAll()
       this._workspaceSendToBack()
     }
+  }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
   }
 }

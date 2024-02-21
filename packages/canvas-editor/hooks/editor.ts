@@ -1,7 +1,7 @@
 import { inject } from 'vue'
 
 import type { fabric } from 'fabric'
-import type { Editor } from '../core'
+import type { Editor } from '@/canvas-editor/core'
 import type { CanvasEventEmitter } from '../utils/event/notifier'
 
 /**

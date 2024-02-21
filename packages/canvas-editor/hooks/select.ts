@@ -4,16 +4,17 @@
  * @Author: Mark
  * @Date: 2024-01-21 21:10:05
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-22 19:13:30
+ * @LastEditTime: 2024-02-03 23:39:47
  */
-
 import { useEditor } from './editor'
-import { onBeforeMount, onMounted, reactive } from 'vue'
-import { SelectEvent, SelectMode, SelectOneType } from '../utils/event/types'
+import { onBeforeUnmount, onMounted, reactive } from 'vue'
+import { SelectEvent, SelectMode, SelectOneCustomType, SelectOneType } from '../utils/event/types'
+import type { fabric } from 'fabric'
 
 interface Selector {
   mSelectMode: SelectMode
   mSelectOneType: SelectOneType
+  mSelectOneCustomType: SelectOneCustomType
   mSelectId: string[] | string
   mSelectIds: string[]
   mSelectActive: unknown[]
@@ -24,6 +25,7 @@ export function useSelect() {
   const state = reactive<Selector>({
     mSelectMode: SelectMode.EMPTY,
     mSelectOneType: SelectOneType.EMPTY,
+    mSelectOneCustomType: SelectOneCustomType.EMPTY,
     mSelectId: '', // 选择id
     mSelectIds: [], // 选择id
     mSelectActive: [],
@@ -31,15 +33,18 @@ export function useSelect() {
 
   const selectOne = (e: fabric.Object[]) => {
     state.mSelectMode = SelectMode.ONE
-    state.mSelectId = e[0].name as string
+    state.mSelectId = e[0].id as string
     state.mSelectOneType = e[0].type as SelectOneType.EMPTY
-    state.mSelectIds = e.map(item => item.name!)
+    if (e[0].custom) {
+      state.mSelectOneCustomType = ['qrcode', 'dateTB'].includes(e[0].custom.type) ? e[0].custom.type as SelectOneCustomType : SelectOneCustomType.EMPTY
+    }
+    state.mSelectIds = e.map(item => item.id!)
   }
 
   const selectMulti = (e: fabric.Object[]) => {
     state.mSelectMode = SelectMode.MULTI
     state.mSelectId = ''
-    state.mSelectIds = e.map(item => item.name!)
+    state.mSelectIds = e.map(item => item.id!)
   }
 
   const selectCancel = () => {
@@ -55,7 +60,7 @@ export function useSelect() {
     event?.on(SelectEvent.CANCEL, selectCancel)
   })
 
-  onBeforeMount(() => {
+  onBeforeUnmount(() => {
     event?.off(SelectEvent.ONE, selectOne)
     event?.off(SelectEvent.MULTI, selectMulti)
     event?.off(SelectEvent.CANCEL, selectCancel)

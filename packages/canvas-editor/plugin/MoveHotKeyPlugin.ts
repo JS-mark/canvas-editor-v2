@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-06-20 12:52:09
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-24 13:07:12
+ * @LastEditTime: 2024-02-07 11:30:59
  * @Description: 移动快捷键
  */
 
@@ -35,22 +35,22 @@ export class MoveHotKeyPlugin extends Plugin.BasePlugin {
         return
       switch (eventName) {
         case 'left':
-          if (activeObject.left === undefined)
+          if (activeObject.left === undefined || (this._options.enableLockMove && !activeObject.hasControls))
             return
           activeObject.set('left', activeObject.left - 1)
           break
         case 'right':
-          if (activeObject.left === undefined)
+          if (activeObject.left === undefined || (this._options.enableLockMove && !activeObject.hasControls))
             return
           activeObject.set('left', activeObject.left + 1)
           break
         case 'down':
-          if (activeObject.top === undefined)
+          if (activeObject.top === undefined || (this._options.enableLockMove && !activeObject.hasControls))
             return
           activeObject.set('top', activeObject.top + 1)
           break
         case 'up':
-          if (activeObject.top === undefined)
+          if (activeObject.top === undefined || (this._options.enableLockMove && !activeObject.hasControls))
             return
           activeObject.set('top', activeObject.top - 1)
           break
@@ -58,5 +58,9 @@ export class MoveHotKeyPlugin extends Plugin.BasePlugin {
       }
       this._canvas.renderAll()
     }
+  }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
   }
 }

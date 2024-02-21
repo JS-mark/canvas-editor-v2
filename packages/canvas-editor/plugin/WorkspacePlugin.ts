@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-06-27 12:26:41
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-29 06:59:38
+ * @LastEditTime: 2024-02-04 11:38:54
  * @Description: 画布区域插件
  */
 
@@ -67,6 +67,7 @@ export class WorkspacePlugin extends Plugin.BasePlugin {
       height,
       left: 0,
       top: 0,
+      id: 'workspace',
       name: 'workspace',
       strokeWidth: 0,
       selectable: false,
@@ -78,7 +79,6 @@ export class WorkspacePlugin extends Plugin.BasePlugin {
       scaleX: 1,
       scaleY: 1,
       fill: 'rgba(255, 255, 255, 1)',
-      // @ts-expect-error
       custom: {
         type: 'workspace',
       },
@@ -120,6 +120,11 @@ export class WorkspacePlugin extends Plugin.BasePlugin {
     this._initWorkspace()
     this._initResizeObserve()
     this._bindWheel()
+    /**
+     * 通知编辑器已经 ready
+     * NOTE: 仅当 workspace 加载完毕时才算编辑器初始化完成
+     */
+    this._editor.emit('ready')
   }
 
   hookImportAfter(): Promise<void> {

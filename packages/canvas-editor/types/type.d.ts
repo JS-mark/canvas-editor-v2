@@ -1,4 +1,4 @@
-import type CanvasRuler, { Rect } from './ruler'
+import type CanvasRuler, { Rect } from '../core/ruler/ruler'
 
 declare module 'fabric/fabric-impl' {
   export interface controlsUtils {

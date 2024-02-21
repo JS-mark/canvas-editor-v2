@@ -10,7 +10,7 @@ export default defineConfig((config: UserConfig) => {
     plugins: [
       Dts({
         tsconfigPath: './tsconfig.json',
-        rollupTypes: true,
+        rollupTypes: false,
         outDir: 'dist/types',
         exclude: ['**/__tests__/**', '**/*.stories.@(js|jsx|ts|tsx)', 'vite.config.ts'],
       })
@@ -25,7 +25,6 @@ export default defineConfig((config: UserConfig) => {
       // Could also be a dictionary or array of multiple entry points
         entry: resolve(__dirname, './index.ts'),
         name: 'canvas-editor',
-        formats: ['es', 'umd'],
         fileName: (format, entryName) => `${format}.${entryName}`
       },
       rollupOptions: {

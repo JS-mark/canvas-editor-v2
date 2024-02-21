@@ -25,6 +25,6 @@
   "include": [
     "./index.ts",
     "./**/*.ts",
-    "./type.d.ts"
+    "types/plugin.d.ts"
   ],
 }

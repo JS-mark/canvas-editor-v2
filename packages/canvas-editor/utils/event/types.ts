@@ -14,6 +14,11 @@ export enum SelectOneType {
   GROUP = 'group',
   POLYGON = 'polygon',
 }
+export enum SelectOneCustomType {
+  EMPTY = '',
+  QRCODE = 'qrcode',
+  DATE_T_B = 'dateTB',
+}
 
 // 选择事件（用于广播）
 export enum SelectEvent {

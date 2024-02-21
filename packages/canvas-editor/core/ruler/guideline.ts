@@ -56,7 +56,6 @@ export function setupGuideLine() {
       this.on('mouseup', (e) => {
         // 移动到标尺上，移除辅助线
         if (this.canvas.ruler.options.enabled && this.isPointOnRuler(e.e)) {
-          // console.log('移除辅助线', this);
           // @ts-expect-error
           this.canvas.remove(this)
           return
