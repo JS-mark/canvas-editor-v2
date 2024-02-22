@@ -1,17 +1,33 @@
-import { inject } from 'vue'
-
-import type { fabric } from 'fabric'
-import type { Editor } from '@/canvas-editor/core'
-import type { CanvasEventEmitter } from '../utils/event/notifier'
+import type { Editor } from '../core'
+import notifier from '../utils/event/notifier'
+import { version } from '../package.json'
+const EDITOR_KEY = '__canvas_editor'
+type UseEditorCB = (editor: Editor) => void
 
 /**
  * 使用editor
- * @returns any
+ * @returns void
  */
-export const useEditor = () => {
-  return {
-    fabric: inject<typeof fabric>('fabric'),
-    event: inject<CanvasEventEmitter>('event'),
-    canvasEditor: inject<Editor>('canvasEditor'),
+export function useEditor(cb: UseEditorCB): void {
+  if (window[EDITOR_KEY]) {
+    cb && cb(window[EDITOR_KEY].core)
+    return
   }
+  // 监听
+  notifier.once('init-editor', (editor: Editor) => {
+    cb && cb(editor)
+  })
+}
+
+/**
+ * 更新数据
+ * @param editor
+ */
+export const setEditor = (editor: Editor) => {
+  window[EDITOR_KEY] = {
+    version,
+    core: editor
+  }
+  // 通知
+  notifier.emit('init-editor', editor)
 }

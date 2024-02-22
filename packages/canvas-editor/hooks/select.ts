@@ -4,9 +4,9 @@
  * @Author: Mark
  * @Date: 2024-01-21 21:10:05
  * @LastEditors: Mark
- * @LastEditTime: 2024-02-03 23:39:47
+ * @LastEditTime: 2024-02-22 15:29:13
  */
-import { useEditor } from './editor'
+import notifier from '../utils/event/notifier'
 import { onBeforeUnmount, onMounted, reactive } from 'vue'
 import { SelectEvent, SelectMode, SelectOneCustomType, SelectOneType } from '../utils/event/types'
 import type { fabric } from 'fabric'
@@ -21,7 +21,6 @@ interface Selector {
 }
 
 export function useSelect() {
-  const { event } = useEditor()
   const state = reactive<Selector>({
     mSelectMode: SelectMode.EMPTY,
     mSelectOneType: SelectOneType.EMPTY,
@@ -36,7 +35,7 @@ export function useSelect() {
     state.mSelectId = e[0].id as string
     state.mSelectOneType = e[0].type as SelectOneType.EMPTY
     if (e[0].custom) {
-      state.mSelectOneCustomType = ['qrcode', 'dateTB'].includes(e[0].custom.type) ? e[0].custom.type as SelectOneCustomType : SelectOneCustomType.EMPTY
+      state.mSelectOneCustomType = e[0].custom.type ? e[0].custom.type as SelectOneCustomType : SelectOneCustomType.EMPTY
     }
     state.mSelectIds = e.map(item => item.id!)
   }
@@ -55,15 +54,15 @@ export function useSelect() {
   }
 
   onMounted(() => {
-    event?.on(SelectEvent.ONE, selectOne)
-    event?.on(SelectEvent.MULTI, selectMulti)
-    event?.on(SelectEvent.CANCEL, selectCancel)
+    notifier?.on(SelectEvent.ONE, selectOne)
+    notifier?.on(SelectEvent.MULTI, selectMulti)
+    notifier?.on(SelectEvent.CANCEL, selectCancel)
   })
 
   onBeforeUnmount(() => {
-    event?.off(SelectEvent.ONE, selectOne)
-    event?.off(SelectEvent.MULTI, selectMulti)
-    event?.off(SelectEvent.CANCEL, selectCancel)
+    notifier?.off(SelectEvent.ONE, selectOne)
+    notifier?.off(SelectEvent.MULTI, selectMulti)
+    notifier?.off(SelectEvent.CANCEL, selectCancel)
   })
 
   return {

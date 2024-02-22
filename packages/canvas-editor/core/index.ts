@@ -1,4 +1,5 @@
 import hotkeys from 'hotkeys-js'
+import { setEditor } from '../hooks'
 import EventEmitter from 'eventemitter3'
 import { AsyncSeriesHook } from 'tapable'
 import { assign, isArray } from 'lodash-es'
@@ -75,6 +76,8 @@ export class Editor extends EventEmitter {
     // 监听编辑器状态
     this.once('ready', () => {
       this.updateStatus({ ready: true })
+      // init 完成
+      setEditor(this)
     })
     this.initFont()
   }
