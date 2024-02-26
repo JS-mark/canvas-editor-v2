@@ -1,12 +1,12 @@
+import { fabric } from 'fabric';
 /*
  * @Author: Mark
  * @Date: 2024-01-22 23:00:43
  * @LastEditors: Mark
- * @LastEditTime: 2024-02-26 14:42:38
+ * @LastEditTime: 2024-02-26 18:58:09
  * @Description: 控制条插件
  */
 
-import { fabric } from 'fabric'
 import { PiBy180 } from '../core/constant'
 import { Plugin } from './createPlugin'
 import verticalImg from '../assets/editor/middlecontrol.svg'
@@ -61,6 +61,12 @@ function drawImg(
 }
 
 export class ControlsPlugin extends Plugin.BasePlugin {
+  private _fabric: typeof fabric
+  private _config: {
+    delete: boolean
+    interval: boolean
+    controls: { [key: string]: any }
+  }
   get name() {
     return 'ControlsPlugin'
   }
@@ -73,9 +79,18 @@ export class ControlsPlugin extends Plugin.BasePlugin {
     return []
   }
 
+  get fabric() {
+    return this._fabric
+  }
+
   constructor(canvas: fabric.Canvas, editor: Editor, options: Plugin.Options) {
     super(canvas, editor, options)
     this._fabric = options.fabric
+    this._config = options.config || {
+      delete: true,
+      interval: true,
+      controls: {}
+    }
     this.init()
   }
 
@@ -318,6 +333,7 @@ export class ControlsPlugin extends Plugin.BasePlugin {
       render: renderIconEdge,
     })
   }
+
   // 删除
   deleteControl(canvas: fabric.Canvas) {
     const deleteIcon
@@ -405,18 +421,17 @@ export class ControlsPlugin extends Plugin.BasePlugin {
   }
 
   init() {
-
     /**
      * 实际场景: 在进行某个对象缩放的时候，由于fabricjs默认精度使用的是toFixed(2)。
      * 此处为了缩放的精度更准确一些，因此将NUM_FRACTION_DIGITS默认值改为4，即toFixed(4).
      */
     this._fabric.Object.NUM_FRACTION_DIGITS = 4
     // 删除图标
-    this.deleteControl(this._canvas)
+    this._config.delete && this.deleteControl(this._canvas)
     // 顶点图标
     this.peakControl()
     // 中间横杠图标
-    this.intervalControl()
+    this._config.interval && this.intervalControl()
 
     // 选中样式更新
     this._fabric.Object.prototype.set({
@@ -433,6 +448,8 @@ export class ControlsPlugin extends Plugin.BasePlugin {
       cornerStrokeColor: '#0E98FC',
       // 选中移动时透明度
       borderOpacityWhenMoving: 1,
+      // 特殊配置
+      ...this._config.controls
     })
   }
 }
