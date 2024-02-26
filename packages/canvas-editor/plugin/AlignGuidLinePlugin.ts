@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-05-21 08:55:25
  * @LastEditors: Mark
- * @LastEditTime: 2024-02-06 11:43:16
+ * @LastEditTime: 2024-02-22 20:48:47
  * @Description: 辅助线功能
  */
 
@@ -296,7 +296,6 @@ export class AlignGuidLinePlugin extends Plugin.BasePlugin {
     this._canvas.on('before:render', () => {
       // fix 保存图片时报错
       try {
-        // @ts-expect-error
         this._canvas.clearContext(this._canvas?.contextTop)
       }
       catch (error) {
@@ -322,5 +321,9 @@ export class AlignGuidLinePlugin extends Plugin.BasePlugin {
       horizontalLines.length = 0
       this._canvas.renderAll()
     })
+  }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
   }
 }

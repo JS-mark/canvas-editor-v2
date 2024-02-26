@@ -1,12 +1,8 @@
+import { Plugin } from './createPlugin'
+import { SelectEvent, SelectMode } from '../utils/event/types'
+
 import type { fabric } from 'fabric'
 import type { Editor } from '../core'
-import { SelectEvent, SelectMode } from '../utils/event/types'
-import type { Ref } from 'vue'
-import { ref } from 'vue'
-
-import event from '../utils/event/notifier'
-import { Plugin } from './createPlugin'
-
 export class FlipPlugin extends Plugin.BasePlugin {
   get name() {
     return 'FlipPlugin'
@@ -20,18 +16,18 @@ export class FlipPlugin extends Plugin.BasePlugin {
     return []
   }
 
-  selectedMode: Ref<SelectMode>
+  selectedMode: SelectMode
   constructor(canvas: fabric.Canvas, editor: Editor, options: Plugin.Options) {
     super(canvas, editor, options)
 
-    this.selectedMode = ref(SelectMode.EMPTY)
+    this.selectedMode = SelectMode.EMPTY
     this.init()
   }
 
   init() {
-    event.on(SelectEvent.ONE, () => (this.selectedMode.value = SelectMode.ONE))
-    event.on(SelectEvent.MULTI, () => (this.selectedMode.value = SelectMode.MULTI))
-    event.on(SelectEvent.CANCEL, () => (this.selectedMode.value = SelectMode.EMPTY))
+    this._editor.on(SelectEvent.ONE, () => (this.selectedMode = SelectMode.ONE))
+    this._editor.on(SelectEvent.MULTI, () => (this.selectedMode = SelectMode.MULTI))
+    this._editor.on(SelectEvent.CANCEL, () => (this.selectedMode = SelectMode.EMPTY))
   }
 
   /**
@@ -44,5 +40,15 @@ export class FlipPlugin extends Plugin.BasePlugin {
       activeObject.set(`flip${type}`, !activeObject[`flip${type}`]).setCoords()
       this._canvas.requestRenderAll()
     }
+  }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
+  }
+
+  async destroy() {
+    this._editor.off(SelectEvent.ONE, () => (this.selectedMode = SelectMode.ONE))
+    this._editor.off(SelectEvent.MULTI, () => (this.selectedMode = SelectMode.MULTI))
+    this._editor.off(SelectEvent.CANCEL, () => (this.selectedMode = SelectMode.EMPTY))
   }
 }

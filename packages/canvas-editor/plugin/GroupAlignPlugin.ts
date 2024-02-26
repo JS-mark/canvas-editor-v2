@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-06-22 16:19:46
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-31 10:48:14
+ * @LastEditTime: 2024-02-22 20:50:16
  * @Description: 组对齐插件
  */
 
@@ -253,5 +253,9 @@ export class GroupAlignPlugin extends Plugin.BasePlugin {
       })
       this._canvas.renderAll()
     }
+  }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
   }
 }

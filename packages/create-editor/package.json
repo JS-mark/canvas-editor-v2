@@ -29,10 +29,14 @@
   "scripts": {
     "dev": "unbuild --stub",
     "build": "unbuild",
+    "prepack": "nr build",
+    "prepare": "echo 'test'",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "release": "bumpp && pnpm publish"
   },
   "devDependencies": {
+    "@antfu/ni": "^0.21.12",
+    "bumpp": "^9.3.0",
     "@types/cross-spawn": "^6.0.6",
     "@types/minimist": "^1.2.5",
     "@types/prompts": "^2.4.9",

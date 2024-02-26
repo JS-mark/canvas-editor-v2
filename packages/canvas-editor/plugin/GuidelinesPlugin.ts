@@ -39,4 +39,8 @@ export class GuidelinesPlugin extends Plugin.BasePlugin {
   getalignGuidelines() {
     return this.alignGuidelines
   }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
+  }
 }

@@ -251,6 +251,8 @@ export class Editor extends EventEmitter {
    * 卸载编辑器
    */
   unMounted() {
+    // 卸载前通知
+    this.emit('editor_before_unmounted')
     const plugins = this._pluginMap.values()
     for (const plugin of plugins) {
       // 解绑数据

@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-06-22 16:11:40
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-30 13:56:40
+ * @LastEditTime: 2024-02-22 20:50:27
  * @Description: 组内文字编辑
  */
 
@@ -205,5 +205,9 @@ export class GroupTextEditorPlugin extends Plugin.BasePlugin {
 
   isText(obj: fabric.Object) {
     return obj.type && ['i-text', 'text', 'textbox'].includes(obj.type)
+  }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
   }
 }

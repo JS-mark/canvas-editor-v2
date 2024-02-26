@@ -29,11 +29,12 @@
   },
   "scripts": {
     "dev": "vite",
-    "test": "vitest",
-    "coverage": "vitest run --coverage",
     "build": "vite build",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "prepack": "nr build",
+    "prepare": "echo 'test'",
+    "lint:fix": "eslint . --fix",
+    "release": "bumpp && pnpm publish"
   },
   "dependencies": {
     "eventemitter3": "^5.0.1",
@@ -45,6 +46,8 @@
     "tapable": "^2.2.1"
   },
   "devDependencies": {
+    "@antfu/ni": "^0.21.12",
+    "bumpp": "^9.3.0",
     "@types/fabric": "^5.3.7",
     "@types/fontfaceobserver": "^2.1.3",
     "@types/tapable": "^2.2.7",

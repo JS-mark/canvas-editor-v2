@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-07-04 23:45:49
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-19 18:39:16
+ * @LastEditTime: 2024-02-22 20:50:54
  * @Description: 标尺插件
  */
 
@@ -63,5 +63,9 @@ export class RulerPlugin extends Plugin.BasePlugin {
 
   rulerDisable() {
     this.ruler.disable()
+  }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
   }
 }

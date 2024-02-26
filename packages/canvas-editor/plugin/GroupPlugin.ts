@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-06-20 13:21:10
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-26 20:03:45
+ * @LastEditTime: 2024-02-22 20:50:21
  * @Description: 组合拆分组合插件
  */
 
@@ -60,5 +60,9 @@ export class GroupPlugin extends Plugin.BasePlugin {
       this._canvas.add(newgroup)
       this._canvas.setActiveObject(newgroup)
     })
+  }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
   }
 }

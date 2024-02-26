@@ -1,17 +1,23 @@
+
 /*
  * @Description: useSelect(原mixin)  类型待优化
  * @version:
  * @Author: Mark
  * @Date: 2024-01-21 21:10:05
  * @LastEditors: Mark
- * @LastEditTime: 2024-02-22 15:29:13
+ * @LastEditTime: 2024-02-26 11:04:21
  */
-import notifier from '../utils/event/notifier'
-import { onBeforeUnmount, onMounted, reactive } from 'vue'
-import { SelectEvent, SelectMode, SelectOneCustomType, SelectOneType } from '../utils/event/types'
+import { reactive } from 'vue'
+import {
+  useEditor,
+  SelectEvent,
+  SelectMode,
+  SelectOneCustomType,
+  SelectOneType
+} from '@tm2js/canvas-editor'
 import type { fabric } from 'fabric'
 
-interface Selector {
+export interface Selector {
   mSelectMode: SelectMode
   mSelectOneType: SelectOneType
   mSelectOneCustomType: SelectOneCustomType
@@ -20,14 +26,15 @@ interface Selector {
   mSelectActive: unknown[]
 }
 
-export function useSelect() {
-  const state = reactive<Selector>({
+
+export function useEditorSelect() {
+  const state = reactive({
     mSelectMode: SelectMode.EMPTY,
     mSelectOneType: SelectOneType.EMPTY,
     mSelectOneCustomType: SelectOneCustomType.EMPTY,
     mSelectId: '', // 选择id
-    mSelectIds: [], // 选择id
-    mSelectActive: [],
+    mSelectIds: [] as string[], // 选择id
+    mSelectActive: [] as fabric.Object[],
   })
 
   const selectOne = (e: fabric.Object[]) => {
@@ -53,19 +60,19 @@ export function useSelect() {
     state.mSelectOneType = SelectOneType.EMPTY
   }
 
-  onMounted(() => {
-    notifier?.on(SelectEvent.ONE, selectOne)
-    notifier?.on(SelectEvent.MULTI, selectMulti)
-    notifier?.on(SelectEvent.CANCEL, selectCancel)
-  })
-
-  onBeforeUnmount(() => {
-    notifier?.off(SelectEvent.ONE, selectOne)
-    notifier?.off(SelectEvent.MULTI, selectMulti)
-    notifier?.off(SelectEvent.CANCEL, selectCancel)
+  useEditor((canvasEditor) => {
+    canvasEditor?.on(SelectEvent.ONE, selectOne)
+    canvasEditor?.on(SelectEvent.MULTI, selectMulti)
+    canvasEditor?.on(SelectEvent.CANCEL, selectCancel)
+    // 监听编辑器卸载事件
+    canvasEditor.once('editor_before_unmount', () => {
+      canvasEditor?.off(SelectEvent.ONE, selectOne)
+      canvasEditor?.off(SelectEvent.MULTI, selectMulti)
+      canvasEditor?.off(SelectEvent.CANCEL, selectCancel)
+    })
   })
 
   return {
-    mixinState: state,
+    mixinState: state
   }
 }

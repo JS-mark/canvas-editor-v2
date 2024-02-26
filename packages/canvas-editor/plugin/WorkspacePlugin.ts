@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-06-27 12:26:41
  * @LastEditors: Mark
- * @LastEditTime: 2024-02-04 11:38:54
+ * @LastEditTime: 2024-02-22 20:51:05
  * @Description: 画布区域插件
  */
 
@@ -265,5 +265,9 @@ export class WorkspacePlugin extends Plugin.BasePlugin {
       obj.evented = true
     })
     this._canvas.requestRenderAll()
+  }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
   }
 }

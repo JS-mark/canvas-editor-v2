@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-06-21 22:09:36
  * @LastEditors: Mark
- * @LastEditTime: 2024-02-03 21:27:44
+ * @LastEditTime: 2024-02-22 20:50:09
  * @Description: file content
  */
 
@@ -140,5 +140,9 @@ export class DrawLinePlugin extends Plugin.BasePlugin {
         obj.hasControls = true
       }
     })
+  }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
   }
 }

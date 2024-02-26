@@ -2,27 +2,28 @@
  * @Author: Mark
  * @Date: 2022-09-03 19:16:55
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-24 13:08:54
+ * @LastEditTime: 2024-02-26 10:50:34
  * @Description: 自定义事件
  */
 
 import { fabric } from 'fabric'
 import { SelectEvent } from './types'
 import EventEmitter from 'eventemitter3'
+import type { Editor } from '../../core'
 
 /**
  * 发布订阅器
  */
 class CanvasEventEmitter extends EventEmitter {
-  handler: fabric.Canvas | undefined
+  _editor?: Editor
   mSelectMode = ''
 
-  init(handler: CanvasEventEmitter['handler']) {
-    this.handler = handler
-    if (this.handler) {
-      this.handler.on('selection:created', () => this.selected())
-      this.handler.on('selection:updated', () => this.selected())
-      this.handler.on('selection:cleared', () => this.selected())
+  init(editor: Editor) {
+    this._editor = editor
+    if (this._editor) {
+      this._editor.canvas?.on('selection:created', () => this.selected())
+      this._editor.canvas?.on('selection:updated', () => this.selected())
+      this._editor.canvas?.on('selection:cleared', () => this.selected())
     }
   }
 
@@ -31,22 +32,22 @@ class CanvasEventEmitter extends EventEmitter {
    * @private
    */
   private selected() {
-    if (!this.handler) {
+    if (!this._editor) {
       throw new TypeError('还未初始化')
     }
 
-    const actives = this.handler
-      .getActiveObjects()
+    const actives = this._editor.canvas
+      ?.getActiveObjects()
       .filter(item => !(item instanceof fabric.GuideLine)) // 过滤掉辅助线
     if (actives && actives.length === 1) {
-      this.emit(SelectEvent.ONE, actives)
+      this._editor.emit(SelectEvent.ONE, actives)
     }
     else if (actives && actives.length > 1) {
       this.mSelectMode = 'multiple'
-      this.emit(SelectEvent.MULTI, actives)
+      this._editor.emit(SelectEvent.MULTI, actives)
     }
     else {
-      this.emit(SelectEvent.CANCEL)
+      this._editor.emit(SelectEvent.CANCEL)
     }
   }
 }

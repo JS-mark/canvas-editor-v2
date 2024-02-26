@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-06-13 23:07:04
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-26 20:01:27
+ * @LastEditTime: 2024-02-26 13:00:09
  * @Description: 控制条插件
  */
 
@@ -16,6 +16,7 @@ function rotateIcon(angle: number) {
 }
 
 export class ControlsRotatePlugin extends Plugin.BasePlugin {
+  private _fabric?: typeof fabric
   get name() {
     return 'ControlsRotatePlugin'
   }
@@ -30,12 +31,13 @@ export class ControlsRotatePlugin extends Plugin.BasePlugin {
 
   constructor(canvas: fabric.Canvas, editor: Editor, options: Plugin.Options) {
     super(canvas, editor, options)
+    this._fabric = options.fabric
     this.init()
   }
 
   init() {
     // 添加旋转控制响应区域
-    fabric.Object.prototype.controls.mtr = new fabric.Control({
+    this._fabric!.Object.prototype.controls.mtr = new fabric.Control({
       x: -0.5,
       y: -0.5,
       offsetY: -10,
@@ -45,7 +47,7 @@ export class ControlsRotatePlugin extends Plugin.BasePlugin {
       render: () => '',
     })
     // ↖左上
-    fabric.Object.prototype.controls.mtr2 = new fabric.Control({
+    this._fabric!.Object.prototype.controls.mtr2 = new fabric.Control({
       x: 0.5,
       y: -0.5,
       offsetY: -10,
@@ -56,7 +58,7 @@ export class ControlsRotatePlugin extends Plugin.BasePlugin {
     })
 
     // ↗右上
-    fabric.Object.prototype.controls.mtr3 = new fabric.Control({
+    this._fabric!.Object.prototype.controls.mtr3 = new fabric.Control({
       x: 0.5,
       y: 0.5,
       offsetY: 10,
@@ -66,7 +68,7 @@ export class ControlsRotatePlugin extends Plugin.BasePlugin {
       render: () => '',
     })
     // ↘右下
-    fabric.Object.prototype.controls.mtr4 = new fabric.Control({
+    this._fabric!.Object.prototype.controls.mtr4 = new fabric.Control({
       x: -0.5,
       y: 0.5,
       offsetY: 10,
@@ -82,10 +84,10 @@ export class ControlsRotatePlugin extends Plugin.BasePlugin {
       const activeObj = this._canvas.getActiveObject()
       const angle = activeObj?.angle?.toFixed(2)
       if (angle !== undefined) {
-        fabric.Object.prototype.controls.mtr.cursorStyle = rotateIcon(Number(angle))
-        fabric.Object.prototype.controls.mtr2.cursorStyle = rotateIcon(Number(angle) + 90)
-        fabric.Object.prototype.controls.mtr3.cursorStyle = rotateIcon(Number(angle) + 180)
-        fabric.Object.prototype.controls.mtr4.cursorStyle = rotateIcon(Number(angle) + 270)
+        this._fabric!.Object.prototype.controls.mtr.cursorStyle = rotateIcon(Number(angle))
+        this._fabric!.Object.prototype.controls.mtr2.cursorStyle = rotateIcon(Number(angle) + 90)
+        this._fabric!.Object.prototype.controls.mtr3.cursorStyle = rotateIcon(Number(angle) + 180)
+        this._fabric!.Object.prototype.controls.mtr4.cursorStyle = rotateIcon(Number(angle) + 270)
       }
     })
 

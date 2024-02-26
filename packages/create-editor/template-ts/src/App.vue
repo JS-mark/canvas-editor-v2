@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import { fabric } from 'fabric'
-import { createCore, WorkspacePlugin } from '@tm2js/canvas-editor'
-import '@tm2js/canvas-editor/dist/index.css'
-
-// new 一个编辑器核心
-const core = createCore()
-
+import { useCanvasEditor } from './plugins/canvas-editor'
 // 创建fabric canvas实例
 const canvas = new fabric.Canvas('canvas', {
   width: 800,
@@ -13,9 +8,7 @@ const canvas = new fabric.Canvas('canvas', {
   backgroundColor: '#f5f5f5'
 })
 // 初始化编辑器
-core.init(canvas)
-// 使用编辑器插件
-core.use({ Ctor: WorkspacePlugin, options: {} })
+useCanvasEditor(canvas, [])
 </script>
 
 <template>

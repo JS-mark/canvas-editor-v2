@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-05-19 08:31:34
  * @LastEditors: Mark
- * @LastEditTime: 2024-01-30 13:52:08
+ * @LastEditTime: 2024-02-22 20:50:04
  * @Description: 拖拽插件
  */
 
@@ -131,5 +131,9 @@ export class DragingPlugin extends Plugin.BasePlugin {
     if (e.code === 'Space' && e.type === 'keyup') {
       this.endDraging()
     }
+  }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
   }
 }

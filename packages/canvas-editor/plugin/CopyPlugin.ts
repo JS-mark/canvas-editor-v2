@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-06-20 12:38:37
  * @LastEditors: Mark
- * @LastEditTime: 2024-02-07 14:10:09
+ * @LastEditTime: 2024-02-22 20:49:44
  * @Description: 复制插件
  */
 
@@ -130,5 +130,9 @@ export class CopyPlugin extends Plugin.BasePlugin {
   copyText(obj?: fabric.Object, val = '') {
     const curTarget = obj || this._canvas.getActiveObject()
     return clipboardText(val || curTarget?.name || curTarget?.id || '')
+  }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
   }
 }

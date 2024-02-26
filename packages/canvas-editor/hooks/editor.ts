@@ -1,6 +1,7 @@
 import type { Editor } from '../core'
-import notifier from '../utils/event/notifier'
 import { version } from '../package.json'
+import notifier from '../utils/event/notifier'
+
 const EDITOR_KEY = '__canvas_editor'
 type UseEditorCB = (editor: Editor) => void
 
@@ -14,7 +15,7 @@ export function useEditor(cb: UseEditorCB): void {
     return
   }
   // 监听
-  notifier.once('init-editor', (editor: Editor) => {
+  notifier.once('editor_init', (editor: Editor) => {
     cb && cb(editor)
   })
 }
@@ -29,5 +30,5 @@ export const setEditor = (editor: Editor) => {
     core: editor
   }
   // 通知
-  notifier.emit('init-editor', editor)
+  notifier.emit('editor_init', editor)
 }

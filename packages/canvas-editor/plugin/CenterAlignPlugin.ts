@@ -2,7 +2,7 @@
  * @Author: Mark
  * @Date: 2023-06-15 22:49:42
  * @LastEditors: Mark
- * @LastEditTime: 2024-02-03 22:32:53
+ * @LastEditTime: 2024-02-22 20:49:27
  * @Description: 居中对齐插件
  */
 
@@ -58,5 +58,9 @@ export class CenterAlignPlugin extends Plugin.BasePlugin {
       }
       this._canvas.renderAll()
     }
+  }
+
+  async mounted() {
+    this._editor.emit(`${this.name}:mounted`)
   }
 }
