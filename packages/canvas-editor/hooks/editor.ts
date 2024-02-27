@@ -7,17 +7,26 @@ type UseEditorCB = (editor: Editor) => void
 
 /**
  * 使用editor
- * @returns void
+ * @returns void | Promise<Editor>
  */
-export function useEditor(cb: UseEditorCB): void {
-  if (window[EDITOR_KEY]) {
-    cb && cb(window[EDITOR_KEY].core)
-    return
+export function useEditor(): Promise<Editor>
+export function useEditor(cb: UseEditorCB): void
+export function useEditor(cb?: UseEditorCB): void | Promise<Editor> {
+  const useEditorCB = (cb: (editor: Editor) => void) => {
+    if (window[EDITOR_KEY]) {
+      return cb(window[EDITOR_KEY].core)
+    }
+    notifier.once('editor_init', (editor: Editor) => {
+      cb && cb(editor)
+    })
   }
-  // 监听
-  notifier.once('editor_init', (editor: Editor) => {
-    cb && cb(editor)
-  })
+  if (!cb) {
+    return new Promise((resolve) => {
+      useEditorCB(resolve)
+    })
+  }
+  // 直接调用 cb
+  useEditorCB(cb)
 }
 
 /**
