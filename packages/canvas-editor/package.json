@@ -1,6 +1,6 @@
 {
   "name": "@tm2js/canvas-editor",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "canvas-editor",
   "packageManager": "pnpm@8.15.1",
   "author": "The Mark <sunduo3195@qq.com> (https://github.com/js-mark/)",
