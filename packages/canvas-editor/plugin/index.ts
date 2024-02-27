@@ -6,7 +6,6 @@ import type {
   ControlsPlugin,
   ControlsRotatePlugin,
   CenterAlignPlugin,
-  AttrsEditPlugin,
   LayerPlugin,
   CopyPlugin,
   GroupPlugin,
@@ -30,7 +29,6 @@ export interface UsePlugin {
 
 export interface PluginInstance {
   AlignGuidLinePlugin: InstanceType<typeof AlignGuidLinePlugin>
-  AttrsEditPlugin: InstanceType<typeof AttrsEditPlugin>
   DragingPlugin: InstanceType<typeof DragingPlugin>
   GuidelinesPlugin: InstanceType<typeof GuidelinesPlugin>
   ControlsPlugin: InstanceType<typeof ControlsPlugin>
@@ -74,4 +72,3 @@ export * from './RulerPlugin'
 export * from './DrawLinePlugin'
 export * from './ServersPlugin'
 export * from './GuidelinesPlugin'
-export * from './AttrsEditPlugin'

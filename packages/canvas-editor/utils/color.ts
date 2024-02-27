@@ -70,11 +70,25 @@ export const generateFabricGradientFromColorStops = (
   return bgGradient
 }
 
+/**
+ * 生成渐变色
+ * @param obj
+ * @returns obj
+ */
+export const generateGradient = (obj: ConstructorParameters<typeof fabric.Gradient>[0]) => {
+  return new fabric.Gradient(obj)
+}
+
 interface RGBAColor {
   r: number
   g: number
   b: number
   a: number
+}
+interface RGBColor {
+  r: number
+  g: number
+  b: number
 }
 
 interface GradientColor {
@@ -84,7 +98,7 @@ interface GradientColor {
 
 interface CSSGradient {
   type: 'linear-gradient' | 'radial-gradient'
-  shapeAndPosition?: string
+  shapeAndPosition?: number
   colors: GradientColor[]
 }
 
@@ -170,18 +184,18 @@ export function parseCSSGradient(input: string): CSSGradient | null {
 
   const type = match[1] as 'linear-gradient' | 'radial-gradient'
   const mainPart = match[2]
-  let shapeAndPosition: string | undefined
+  let shapeAndPosition: number | undefined
   let colorsPart: string
 
   if (type === 'linear-gradient') {
     const linearParts = mainPart.split(/,(?=\s*rgba?\()/)
-    shapeAndPosition = linearParts.shift()?.trim()
+    shapeAndPosition = Number(linearParts.shift()?.trim().split('deg')[0])
     colorsPart = linearParts.join(',')
   }
   else if (type === 'radial-gradient') {
     const radialParts = mainPart.split(/,(?=\s*rgba?\()/)
     if (radialParts[0].includes('at')) {
-      shapeAndPosition = radialParts.shift()?.trim()
+      shapeAndPosition = Number(radialParts.shift()?.trim().split('deg')[0])
     }
     colorsPart = radialParts.join(',')
   }
@@ -198,7 +212,7 @@ export function parseCSSGradient(input: string): CSSGradient | null {
   while ((colorMatch = colorPattern.exec(colorsPart)) !== null) {
     const rgba = parseColor(colorMatch[1])
     if (rgba) {
-      const position = parseFloat(colorMatch[2]?.trim()) / 100
+      const position = parseFloat((colorMatch[2]?.trim()) || '0') / 100
       colors.push({ color: rgba, position })
     }
     else {
@@ -221,7 +235,7 @@ export function parseCSSGradient(input: string): CSSGradient | null {
  */
 export function gradientToCss(gradient: fabric.Gradient): string {
   const stops = gradient.colorStops!
-    .map(stop => `${stop.color} ${stop.offset * 100}%`)
+    .map(stop => `${stop.color} ${Math.round((stop.offset || 0) * 100)}%`)
     .join(', ')
 
   if (gradient.type === 'radial') {
@@ -236,4 +250,36 @@ export function gradientToCss(gradient: fabric.Gradient): string {
   }
 
   return ''
+}
+
+/**
+ * 转换渐变数据为 CSS 字符串
+ * @param gradient
+ * @returns string
+ */
+export function gradientToCssV2(gradient: { degree: { x1: number, x2: number, y1: number, y2: number }, mode: 'radial' | 'linear' | 'solid', gradients: GradientColor[] }): string {
+  const stops = gradient.gradients!
+    .map(stop => `${stop.color} ${Math.round((stop.position || 0) * 100)}%`)
+    .join(', ')
+
+  if (gradient.mode === 'radial') {
+    const { x1, y1 } = gradient.degree! as { x1: number, y1: number }
+    return `radial-gradient(circle at ${x1}px ${y1}px, ${stops})`
+  }
+
+  if (gradient.mode === 'linear') {
+    const { x1, y1, x2, y2 } = gradient.degree
+    const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI) + 90
+    return `linear-gradient(${angle}deg, ${stops})`
+  }
+
+  return ''
+}
+
+/**
+ * rgba 转字符串
+ * @param rgba
+ */
+export const rgba2str = (rgba: RGBAColor | RGBColor) => {
+  return `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, ${(rgba as RGBAColor).a ? (rgba as RGBAColor).a : 1})`
 }

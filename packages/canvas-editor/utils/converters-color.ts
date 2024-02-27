@@ -44,7 +44,7 @@ const parseRgba = (
 ): { r: number, g: number, b: number, a: number } | null => {
   // rgba() değerini kontrol etmek için bir regex deseni kullanabiliriz
   const rgbaRegex
-		= /^rgba?\((\s*\d+\s*),(\s*\d+\s*),(\s*\d+\s*),(\s*[\d.]+\s*)\)$/i
+    = /^rgba?\((\s*\d+\s*),(\s*\d+\s*),(\s*\d+\s*),(\s*[\d.]+\s*)\)$/i
 
   // rgba() değerinin doğruluğunu kontrol edelim
   if (!rgbaRegex.test(rgbaString)) {
@@ -274,7 +274,7 @@ const rgbToHsl = (
       s = (max - min) / (2 - max - min)
     }
   }
-  // @ts-expect-error
+  // eslint-disable-next-line no-self-assign
   s = s
   return { h, s, l }
 }

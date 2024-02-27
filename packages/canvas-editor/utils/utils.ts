@@ -2,14 +2,13 @@
  * @Author: Mark
  * @Date: 2024-01-16 14:59:16
  * @LastEditors: Mark
- * @LastEditTime: 2024-02-06 16:42:09
+ * @LastEditTime: 2024-02-27 11:52:23
  * @Description: file content
  */
 
 import { isObject, isString } from 'lodash-es'
 import FontFaceObserver from 'fontfaceobserver'
 import { useClipboard, useFileDialog, useBase64 } from '@vueuse/core'
-
 
 /**
  * @description: 图片文件转字符串
@@ -26,7 +25,6 @@ export function getImgStr(file: File | Blob): Promise<FileReader['result']> {
  * @return {Promise}
  */
 export function downFontByJSON(str: string | any) {
-  const skipFonts = ['arial', 'Microsoft YaHei']
   let data: any | null = null
   if (isString(str)) {
     data = JSON.parse(str)
@@ -36,6 +34,11 @@ export function downFontByJSON(str: string | any) {
     data = str
   }
 
+  /**
+   * 递归遍历字体
+   * @param arr
+   * @returns void
+   */
   const getFontFamilies = (arr: any[]) => {
     const fontFamilies: Map<string, boolean> = new Map()
     arr.map((item: any) => {
