@@ -1100,7 +1100,7 @@ export const baseFonts: FontList[] = [
   },
 ]
 
-const freeFonts: FontList[] = Object.keys(freeFontsMap).map((key: string) => {
+export const freeFonts: FontList[] = Object.keys(freeFontsMap).map((key: string) => {
   const key_ = key as keyof typeof freeFontsMap
   return {
     ...freeFontsMap[key_],
@@ -1122,7 +1122,6 @@ export const setFontsStyle = (fonts: { download: string, name: string, fontFamil
   let el = document.querySelector(id)
   if (el) {
     head.removeChild(el)
-    return
   }
 
   el = document.createElement('style')
@@ -1135,4 +1134,13 @@ export const setFontsStyle = (fonts: { download: string, name: string, fontFamil
     return str
   }, '')
   head.appendChild(el)
+}
+
+
+/**
+ * 重新初始化字体
+ */
+export const resetFontsStyle = (fonts: { download: string, name: string, fontFamily: string }[]): void => {
+  const fonts_ = [...fonts, ...allFonts]
+  setFontsStyle(fonts_)
 }
