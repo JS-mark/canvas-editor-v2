@@ -1,5 +1,5 @@
 const baseUrl = 'https://wordshub.github.io/free-font/images/'
-interface FontList {
+export interface FontList {
   name: string
   fontFamily: string
   download: string
@@ -1139,8 +1139,9 @@ export const setFontsStyle = (fonts: { download: string, name: string, fontFamil
 
 /**
  * 重新初始化字体
+ * 保证字体不重复
  */
 export const resetFontsStyle = (fonts: { download: string, name: string, fontFamily: string }[]): void => {
-  const fonts_ = [...fonts, ...allFonts]
+  const fonts_ = [...fonts]
   setFontsStyle(fonts_)
 }

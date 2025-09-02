@@ -3,7 +3,6 @@ import { setEditor } from '../hooks'
 import EventEmitter from 'eventemitter3'
 import { AsyncSeriesHook } from 'tapable'
 import { assign, isArray } from 'lodash-es'
-import { allFonts, setFontsStyle } from '../utils'
 import type { fabric } from 'fabric'
 import type { Plugin, PluginInstance, UsePlugin } from '../plugin'
 
@@ -79,7 +78,6 @@ export class Editor extends EventEmitter {
       // init 完成
       setEditor(this)
     })
-    this.initFont()
   }
 
   /**
@@ -238,13 +236,6 @@ export class Editor extends EventEmitter {
     this._hooks.forEach((hookName) => {
       this.hooksEntity.set(hookName, new AsyncSeriesHook(['data']))
     })
-  }
-
-  /**
-   * 初始化字体库
-   */
-  private initFont() {
-    setFontsStyle(allFonts)
   }
 
   /**
