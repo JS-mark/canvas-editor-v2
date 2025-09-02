@@ -20,6 +20,7 @@ import type {
   AlignGuidLinePlugin,
   MoveHotKeyPlugin,
   DeleteHotKeyPlugin,
+  InitFontPlugin
 } from '.'
 
 export interface UsePlugin {
@@ -47,6 +48,7 @@ export interface PluginInstance {
   FlipPlugin: InstanceType<typeof FlipPlugin>
   RulerPlugin: InstanceType<typeof RulerPlugin>
   ServersPlugin: InstanceType<typeof ServersPlugin>
+  InitFontPlugin: InstanceType<typeof InitFontPlugin>
   [key: string]: InstanceType<typeof Plugin.BasePlugin>
 }
 
